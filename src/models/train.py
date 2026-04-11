@@ -42,7 +42,7 @@ class EmailDataset(Dataset):
         return self.X[idx], self.y[idx]
 
 
-train_loader = DataLoader(EmailDataset(X_train, y_train), batch_size=32, shuffle=True)
+train_loader = DataLoader(EmailDataset(X_train, y_train), batch_size=128, shuffle=True)
 
 
 # =========================
