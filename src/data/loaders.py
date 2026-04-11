@@ -42,8 +42,8 @@ def text_to_vector(
 def build_dataset(
     df: pd.DataFrame,
     w2v: KeyedVectors,
-    text_col: str = "text",
-    label_col: str = "label",
+    text_col: str = "msg",
+    label_col: str = "isSpam",
     max_len: int = 100,
 ) -> tuple[np.ndarray, np.ndarray]:
     """

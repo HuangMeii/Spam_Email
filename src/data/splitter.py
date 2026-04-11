@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 
 def stratified_train_val_test_split(
     dataframe: pd.DataFrame,
-    label_col: str = "label",
+    label_col: str = "isSpam",
     test_size: float = 0.15,
     val_size: float = 0.15,
     random_state: int = 42,
