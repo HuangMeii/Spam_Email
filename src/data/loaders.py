@@ -6,9 +6,8 @@ from gensim.models import KeyedVectors
 from nltk.tokenize import word_tokenize
 
 
-def load_word2vec(path=None):
-    if path is None:
-        path = "/content/drive/MyDrive/embeddings/word2vec.bin"
+def load_word2vec(path):
+    return KeyedVectors.load_word2vec_format(path, binary=True, limit=100000)
 
 
 def text_to_vector(
