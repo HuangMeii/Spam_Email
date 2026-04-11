@@ -5,8 +5,8 @@ from sklearn.model_selection import train_test_split
 def stratified_train_val_test_split(
     dataframe: pd.DataFrame,
     label_col: str = "label",
-    test_size: float = 0.1,
-    val_size: float = 0.1,
+    test_size: float = 0.15,
+    val_size: float = 0.15,
     random_state: int = 42,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
