@@ -9,9 +9,7 @@ def main():
     # ========================
     # LOAD DATA
     # ========================
-    X, y = load_vector_dataset(
-        "datasets/processed/email_dataset_github_processed_converted.csv"
-    )
+    X, y = load_vector_dataset("datasets/email_dataset_github_processed_converted.csv")
 
     # ========================
     # SPLIT
