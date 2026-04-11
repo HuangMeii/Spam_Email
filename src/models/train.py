@@ -5,34 +5,38 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, f1_score
 
 # =========================
-# ADD PROJECT ROOT (nếu cần import src)
+# PATH
 # =========================
 PROJECT_PATH = "/content/drive/MyDrive"
-sys.path.append(PROJECT_PATH)
-
-
-# =========================
-# PATH DATA
-# =========================
 DATA_PATH = Path("/content/drive/MyDrive/datasets")
+
+sys.path.append(PROJECT_PATH)
 
 # =========================
 # LOAD DATA
 # =========================
-X_train = np.load(DATA_PATH / "X.npy")
-y_train = np.load(DATA_PATH / "y.npy")
+X = np.load(DATA_PATH / "X.npy")
+y = np.load(DATA_PATH / "y.npy")
 
-print("Full shape:", X_train.shape, y_train.shape)
+print("Full shape:", X.shape, y.shape)
 
-n = len(X_train) // 7
-X_train = X_train[:n]
-y_train = y_train[:n]
+# subset (CPU friendly)
+n = len(X) // 7
+X = X[:n]
+y = y[:n]
 
-print("Reduced shape:", X_train.shape, y_train.shape)
+print("Reduced shape:", X.shape, y.shape)
 
-
+# =========================
+# TRAIN / VAL SPLIT
+# =========================
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
 
 # =========================
 # DATASET
@@ -49,27 +53,36 @@ class EmailDataset(Dataset):
         return self.X[idx], self.y[idx]
 
 
-train_loader = DataLoader(EmailDataset(X_train, y_train), batch_size=128, shuffle=True)
+train_loader = DataLoader(
+    EmailDataset(X_train, y_train),
+    batch_size=128,
+    shuffle=True
+)
 
+val_loader = DataLoader(
+    EmailDataset(X_val, y_val),
+    batch_size=128
+)
 
 # =========================
-# LSTM MODEL
+# MODEL
 # =========================
 class LSTMClassifier(nn.Module):
-    def __init__(self, input_dim=300, hidden_dim=128):
+    def __init__(self, input_dim=300, hidden_dim=64):
         super().__init__()
 
         self.lstm = nn.LSTM(
-            input_size=input_dim, hidden_size=hidden_dim, batch_first=True
+            input_size=input_dim,
+            hidden_size=hidden_dim,
+            batch_first=True
         )
 
         self.fc = nn.Linear(hidden_dim, 1)
-        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         _, (h_n, _) = self.lstm(x)
-        out = self.fc(h_n[-1])
-        return self.sigmoid(out).squeeze()
+        logits = self.fc(h_n[-1]).squeeze()
+        return logits   # ❗ NO sigmoid here
 
 
 # =========================
@@ -78,31 +91,28 @@ class LSTMClassifier(nn.Module):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Device:", device)
 
-
-# =========================
-# INIT MODEL
-# =========================
 model = LSTMClassifier().to(device)
 
-criterion = nn.BCELoss()
+# =========================
+# LOSS + OPT
+# =========================
+criterion = nn.BCEWithLogitsLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-
 # =========================
-# TRAIN FUNCTION
+# TRAIN
 # =========================
 def train_epoch():
     model.train()
     total_loss = 0
 
     for X_batch, y_batch in train_loader:
-        X_batch = X_batch.to(device)
-        y_batch = y_batch.to(device)
+        X_batch, y_batch = X_batch.to(device), y_batch.to(device)
 
         optimizer.zero_grad()
 
-        preds = model(X_batch)
-        loss = criterion(preds, y_batch)
+        logits = model(X_batch)
+        loss = criterion(logits, y_batch)
 
         loss.backward()
         optimizer.step()
@@ -111,19 +121,42 @@ def train_epoch():
 
     return total_loss / len(train_loader)
 
+# =========================
+# EVAL (METRICS)
+# =========================
+def evaluate():
+    model.eval()
+
+    preds_all = []
+    labels_all = []
+
+    with torch.no_grad():
+        for X_batch, y_batch in val_loader:
+            X_batch = X_batch.to(device)
+
+            logits = model(X_batch)
+            preds = torch.sigmoid(logits) > 0.5
+
+            preds_all.extend(preds.cpu().numpy())
+            labels_all.extend(y_batch.numpy())
+
+    acc = accuracy_score(labels_all, preds_all)
+    f1 = f1_score(labels_all, preds_all)
+
+    return acc, f1
 
 # =========================
 # TRAIN LOOP
 # =========================
-EPOCHS = 10
+EPOCHS = 5
 
 for epoch in range(EPOCHS):
     loss = train_epoch()
+    acc, f1 = evaluate()
 
     print(f"Epoch {epoch+1}/{EPOCHS}")
-    print(f"Loss: {loss:.4f}")
-    print("-" * 30)
-
+    print(f"Loss: {loss:.4f} | Acc: {acc:.4f} | F1: {f1:.4f}")
+    print("-" * 40)
 
 # =========================
 # SAVE MODEL
