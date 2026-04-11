@@ -6,9 +6,9 @@ Cách dùng:
     [--yes]
 
 Ví dụ:
-    python scripts/delete_dataset.py --name "rain-forecast dataset" --project "Rain Forecast"
+    python scripts/delete_dataset.py --name "email-spam dataset" --project "Rain Forecast"
     python scripts/delete_dataset.py --id "1234567890abcdef"
-    python scripts/delete_dataset.py --name "rain-forecast dataset" --project "Rain Forecast" --yes
+    python scripts/delete_dataset.py --name "email-spam dataset" --project "Rain Forecast" --yes
 """
 
 import argparse

@@ -26,15 +26,15 @@ Tạo môi trường lần đầu:
 
 ```powershell
 conda env create -f .\environment.yml
-conda activate rain-forecast
-conda run -n rain-forecast pre-commit install   # Đảm bảo pre-commit hoạt động khi commit
+conda activate email-spam
+conda run -n email-spam pre-commit install   # Đảm bảo pre-commit hoạt động khi commit
 ```
 
 Cập nhật môi trường:
 
 ```powershell
-conda env update -n rain-forecast -f .\environment.yml --prune -v
-conda run -n rain-forecast pre-commit install   # Luôn chạy lại sau khi update env
+conda env update -n email-spam -f .\environment.yml --prune -v
+conda run -n email-spam pre-commit install   # Luôn chạy lại sau khi update env
 ```
 
 Luôn dùng lệnh trên thay vì:

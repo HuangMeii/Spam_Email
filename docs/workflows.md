@@ -36,7 +36,7 @@ Nguyên tắc: luôn sửa `environment.yml` trước khi chạy lệnh update.
 2. Cập nhật môi trường bằng lệnh chuẩn:
 
    ```powershell
-   conda env update -n rain-forecast -f .\environment.yml --prune -v
+   conda env update -n email-spam -f .\environment.yml --prune -v
    ```
 
 ### 2.2 Xóa dependency thuộc Conda
@@ -45,7 +45,7 @@ Nguyên tắc: luôn sửa `environment.yml` trước khi chạy lệnh update.
 2. Chạy:
 
    ```powershell
-   conda env update -n rain-forecast -f .\environment.yml --prune -v
+   conda env update -n email-spam -f .\environment.yml --prune -v
    ```
 
 ### 2.3 Xóa dependency thuộc PyPI
@@ -102,13 +102,13 @@ Các lệnh Conda phổ biến:
 - Kích hoạt environment:
 
   ```powershell
-  conda activate rain-forecast
+  conda activate email-spam
   ```
 
 - Cập nhật environment theo file (khuyến nghị):
 
   ```powershell
-  conda env update -n rain-forecast -f .\environment.yml --prune -v
+  conda env update -n email-spam -f .\environment.yml --prune -v
   ```
 
 ### 5.2 Xem thông tin và package
@@ -136,5 +136,5 @@ Các lệnh Conda phổ biến:
 - Xóa environment theo tên:
 
   ```powershell
-  conda remove -n rain-forecast --all
+  conda remove -n email-spam --all
   ```

@@ -1,4 +1,4 @@
-name: rain-forecast
+name: email-spam
 channels:
   - conda-forge
   - pytorch

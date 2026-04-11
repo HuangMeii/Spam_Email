@@ -28,7 +28,7 @@ Hướng dẫn reviewer chạy và kiểm tra thay đổi:
 - [ ] Đã chạy lệnh sync môi trường:
 
 ```powershell
-conda env update -n rain-forecast -f .\environment.yml --prune -v
+conda env update -n email-spam -f .\environment.yml --prune -v
 ```
 
 Nếu xóa package PyPI, xác nhận đã gỡ thêm bằng `pip uninstall`.

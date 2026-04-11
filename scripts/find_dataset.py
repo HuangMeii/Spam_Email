@@ -15,10 +15,10 @@ Cách dùng:
 
 Ví dụ:
     python scripts/find_dataset.py --id "1234567890abcdef"
-    python scripts/find_dataset.py --name "rain-forecast dataset" --project "Rain Forecast"
-    python scripts/find_dataset.py --name "rain-forecast dataset" --project "Rain Forecast" --exact
-    python scripts/find_dataset.py --name "rain-forecast dataset" --project "Rain Forecast" --last
-    python scripts/find_dataset.py --name "rain-forecast dataset" --project "Rain Forecast" --last --exact
+    python scripts/find_dataset.py --name "email-spam dataset" --project "Rain Forecast"
+    python scripts/find_dataset.py --name "email-spam dataset" --project "Rain Forecast" --exact
+    python scripts/find_dataset.py --name "email-spam dataset" --project "Rain Forecast" --last
+    python scripts/find_dataset.py --name "email-spam dataset" --project "Rain Forecast" --last --exact
 """
 
 import argparse
