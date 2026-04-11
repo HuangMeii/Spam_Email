@@ -1,6 +1,7 @@
 import pandas as pd
 
-INPUT = "/content/drive/MyDrive/datasets/raw.csv"
+INPUT = "/content/drive/MyDrive/email_dataset_github_processed.csv"
+
 OUTPUT = "/content/drive/MyDrive/datasets/processed.csv"
 
 df = pd.read_csv(INPUT)

@@ -2,7 +2,8 @@ import pandas as pd
 
 from src.data.loaders import build_dataset, load_word2vec, save_cache
 
-DATA_PATH = "/content/drive/MyDrive/datasets/processed.csv"
+DATA_PATH = "/content/drive/MyDrive/email_dataset_github_processed.csv"
+
 W2V_PATH = "/content/drive/MyDrive/embeddings/word2vec.bin"
 
 print("Loading dataset...")
