@@ -16,8 +16,7 @@ sys.path.append(PROJECT_PATH)
 # =========================
 # PATH DATA
 # =========================
-DATA_PATH = Path(PROJECT_PATH) / "datasets"
-
+DATA_PATH = Path("/content/drive/MyDrive/datasets")
 
 # =========================
 # LOAD DATA
