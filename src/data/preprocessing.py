@@ -4,7 +4,7 @@ from src.data.loaders import build_dataset, load_word2vec, save_cache
 from src.data.splitter import stratified_train_val_test_split
 
 # load data
-df = pd.read_csv("data/data.csv")
+df = pd.read_csv("datasets/processed/email_dataset_github_processed.csv")
 
 # split
 train_df, val_df, test_df = stratified_train_val_test_split(df)
