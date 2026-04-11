@@ -7,6 +7,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
+import matplotlib.pyplot as plt
 
 # =========================
 # PATH
@@ -24,7 +25,7 @@ y = np.load(DATA_PATH / "y.npy")
 
 print("Full shape:", X.shape, y.shape)
 
-# reduce dataset (CPU-friendly)
+# reduce dataset for CPU
 n = len(X) // 7
 X = X[:n]
 y = y[:n]
@@ -57,7 +58,7 @@ class EmailDataset(Dataset):
 
 train_loader = DataLoader(
     EmailDataset(X_train, y_train),
-    batch_size=64,
+    batch_size=128,
     shuffle=True
 )
 
@@ -85,7 +86,7 @@ class LSTMClassifier(nn.Module):
     def forward(self, x):
         _, (h_n, _) = self.lstm(x)
         logits = self.fc(h_n[-1]).squeeze()
-        return logits  # no sigmoid here
+        return logits
 
 # =========================
 # DEVICE
@@ -96,7 +97,7 @@ print("Device:", device)
 model = LSTMClassifier().to(device)
 
 # =========================
-# LOSS + OPTIMIZER
+# LOSS + OPT
 # =========================
 criterion = nn.BCEWithLogitsLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -108,7 +109,14 @@ def train_epoch():
     model.train()
     total_loss = 0
 
+    num_samples = 0
+    num_batches = 0
+
     for X_batch, y_batch in train_loader:
+        batch_size = X_batch.size(0)
+        num_samples += batch_size
+        num_batches += 1
+
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
 
@@ -122,16 +130,35 @@ def train_epoch():
 
         total_loss += loss.item()
 
+    print(f"   ➜ Train samples: {num_samples} | Batches: {num_batches}")
+
     return total_loss / len(train_loader)
 
 # =========================
-# EVALUATION FUNCTION
+# FIND BEST THRESHOLD
+# =========================
+def find_best_threshold(probs, labels):
+    best_thresh = 0.5
+    best_f1 = 0
+
+    for t in np.arange(0.1, 0.9, 0.01):
+        preds = (probs >= t).astype(int)
+        f1 = f1_score(labels, preds)
+
+        if f1 > best_f1:
+            best_f1 = f1
+            best_thresh = t
+
+    return best_thresh, best_f1
+
+# =========================
+# EVALUATION
 # =========================
 def evaluate():
     model.eval()
 
     total_loss = 0
-    preds_all = []
+    probs_all = []
     labels_all = []
 
     with torch.no_grad():
@@ -143,16 +170,22 @@ def evaluate():
             loss = criterion(logits, y_batch)
             total_loss += loss.item()
 
-            preds = torch.sigmoid(logits) > 0.5
+            probs = torch.sigmoid(logits)
 
-            preds_all.extend(preds.cpu().numpy())
+            probs_all.extend(probs.cpu().numpy())
             labels_all.extend(y_batch.cpu().numpy())
 
     val_loss = total_loss / len(val_loader)
-    acc = accuracy_score(labels_all, preds_all)
-    f1 = f1_score(labels_all, preds_all)
 
-    return val_loss, acc, f1
+    probs_all = np.array(probs_all)
+    labels_all = np.array(labels_all)
+
+    best_thresh, best_f1 = find_best_threshold(probs_all, labels_all)
+
+    preds = (probs_all >= best_thresh).astype(int)
+    acc = accuracy_score(labels_all, preds)
+
+    return val_loss, acc, best_f1, best_thresh
 
 # =========================
 # TRAIN LOOP
@@ -164,15 +197,15 @@ val_losses = []
 
 for epoch in range(EPOCHS):
     train_loss = train_epoch()
-    val_loss, acc, f1 = evaluate()
+    val_loss, acc, f1, thresh = evaluate()
 
     train_losses.append(train_loss)
     val_losses.append(val_loss)
 
-    print(f"Epoch {epoch+1}/{EPOCHS}")
+    print(f"\nEpoch {epoch+1}/{EPOCHS}")
     print(f"Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f}")
-    print(f"Accuracy: {acc:.4f} | F1-score: {f1:.4f}")
-    print("-" * 50)
+    print(f"Acc: {acc:.4f} | F1: {f1:.4f} | Threshold: {thresh:.2f}")
+    print("-" * 60)
 
 # =========================
 # SAVE MODEL
@@ -183,15 +216,13 @@ torch.save(model.state_dict(), SAVE_PATH)
 print("Saved model to:", SAVE_PATH)
 
 # =========================
-# PLOT LOSS CURVE
+# LOSS CURVE
 # =========================
-import matplotlib.pyplot as plt
-
 plt.plot(train_losses, label="Train Loss")
 plt.plot(val_losses, label="Validation Loss")
 
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
-plt.title("Train vs Validation Loss")
+plt.title("Training vs Validation Loss")
 plt.legend()
 plt.show()
