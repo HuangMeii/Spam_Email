@@ -8,7 +8,7 @@ from src.data.splitter import stratified_train_val_test_split
 
 def main() -> None:
     # 1. Load dataset
-    df = pd.read_csv("datasets/processed/email_dataset_github_processed.csv")
+    df = pd.read_csv("/content/drive/MyDrive/email_dataset_github_processed.csv")
 
     # 2. Split dataset
     train_df, val_df, test_df = stratified_train_val_test_split(df)
