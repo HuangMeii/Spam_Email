@@ -10,11 +10,7 @@ def load_word2vec(path: str) -> KeyedVectors:
     """
     Load pre-trained Word2Vec model (memory efficient).
     """
-    return KeyedVectors.load_word2vec_format(
-        path,
-        binary=True,
-        mmap="r",  # 🔥 giảm RAM
-    )
+    return KeyedVectors.load_word2vec_format(path, binary=True)
 
 
 def text_to_vector(
