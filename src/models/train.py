@@ -24,7 +24,14 @@ DATA_PATH = Path("/content/drive/MyDrive/datasets")
 X_train = np.load(DATA_PATH / "X.npy")
 y_train = np.load(DATA_PATH / "y.npy")
 
-print("Train shape:", X_train.shape, y_train.shape)
+print("Full shape:", X_train.shape, y_train.shape)
+
+n = len(X_train) // 7
+X_train = X_train[:n]
+y_train = y_train[:n]
+
+print("Reduced shape:", X_train.shape, y_train.shape)
+
 
 
 # =========================
