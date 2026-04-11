@@ -14,8 +14,7 @@ def main() -> None:
     train_df, val_df, test_df = stratified_train_val_test_split(df)
 
     # 3. Load Word2Vec
-    w2v = load_word2vec("word2vec.bin")
-
+    w2v = load_word2vec("/content/drive/MyDrive/embeddings/word2vec.bin")
     # 4. Convert → vector
     print("Converting train set...")
     X_train, y_train = build_dataset(train_df, w2v)
