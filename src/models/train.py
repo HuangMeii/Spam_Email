@@ -21,8 +21,8 @@ DATA_PATH = Path("/content/drive/MyDrive/datasets")
 # =========================
 # LOAD DATA
 # =========================
-X_train = np.load(DATA_PATH / "X_train.npy")
-y_train = np.load(DATA_PATH / "y_train.npy")
+X_train = np.load(DATA_PATH / "X.npy")
+y_train = np.load(DATA_PATH / "y.npy")
 
 print("Train shape:", X_train.shape, y_train.shape)
 
