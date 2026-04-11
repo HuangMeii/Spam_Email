@@ -57,7 +57,7 @@ class EmailDataset(Dataset):
 
 train_loader = DataLoader(
     EmailDataset(X_train, y_train),
-    batch_size=128,
+    batch_size=64,
     shuffle=True
 )
 
