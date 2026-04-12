@@ -45,7 +45,7 @@ class EmailDataset(torch.utils.data.Dataset):
 # =========================
 # LOAD DATA
 # =========================
-DATA_PATH = "/content/drive/MyDrive/Spam_Email/datasets"
+DATA_PATH = "/content/drive/MyDrive/datasets"
 
 X = np.load(f"{DATA_PATH}/X.npy")
 y = np.load(f"{DATA_PATH}/y.npy")
