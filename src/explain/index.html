@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LSTM Spam Classifier</title>
+
+<link rel="stylesheet" href="style.css">
+
+<!-- MathJax -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+
+<h1>📧 LSTM Spam Classifier</h1>
+
+<!-- INPUT -->
+<div class="card">
+  <textarea id="text" placeholder="Enter email..."></textarea>
+  <button onclick="run()">Predict</button>
+</div>
+
+<!-- RESULT -->
+<div id="result"></div>
+
+<!-- PIPELINE -->
+<div class="card">
+<h2>🧠 Text Processing Pipeline</h2>
+
+<p>Email được xử lý qua các bước:</p>
+
+<ul>
+<li><b>Chuẩn hoá:</b> lowercase, bỏ ký tự đặc biệt</li>
+<li><b>Tokenization:</b> tách từ</li>
+<li><b>Word2Vec:</b> ánh xạ mỗi từ → vector 300 chiều</li>
+</ul>
+
+<p>Ví dụ:</p>
+<div class="code">
+"Free money now!!!" → ["free", "money", "now"]
+</div>
+
+</div>
+
+<!-- EQUATIONS -->
+<div class="card">
+<h2>⚙️ LSTM Equations</h2>
+
+<p>$$f_t = \sigma(W_f [h_{t-1}, x_t])$$</p>
+<p>$$i_t = \sigma(W_i [h_{t-1}, x_t])$$</p>
+<p>$$o_t = \sigma(W_o [h_{t-1}, x_t])$$</p>
+<p>$$\tilde{C}_t = \tanh(W_c [h_{t-1}, x_t])$$</p>
+
+<p>$$C_t = f_t \cdot C_{t-1} + i_t \cdot \tilde{C}_t$$</p>
+<p>$$h_t = o_t \cdot \tanh(C_t)$$</p>
+
+</div>
+
+<!-- FLOW -->
+<div class="card">
+<h2>📊 LSTM Flow</h2>
+
+<ul>
+<li><b>Forget Gate:</b> chọn thông tin cần quên</li>
+<li><b>Input Gate:</b> chọn thông tin thêm vào</li>
+<li><b>Cell State:</b> bộ nhớ dài hạn</li>
+<li><b>Output Gate:</b> tạo output</li>
+</ul>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
