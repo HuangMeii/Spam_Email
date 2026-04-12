@@ -1,3 +1,6 @@
+from importlib.resources import path
+import os
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -142,5 +145,12 @@ evaluate(
 # =========================
 # SAVE FINAL MODEL
 # =========================
-torch.save(model.state_dict(), "model.pth")
+torch.save({
+        "model_state_dict": model.state_dict(),
+        "threshold": threshold,
+        "val_loss": val_loss
+})
+
+print(f"\n✅ Model saved successfully!")
+print(f"📁 Path: {os.path.abspath(path)}")
 print("\nModel saved successfully.")
