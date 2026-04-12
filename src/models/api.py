@@ -1,11 +1,8 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
-from src.models.predict import predict_text, text_to_tensor
-from src.models.preprocessing import preprocess_email, tokens_to_vectors, load_word2vec
-
-import numpy as np
+from src.models.predict import predict_text
 
 app = FastAPI()
 
@@ -20,14 +17,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# =========================
-# LOAD WORD2VEC (1 lần)
-# =========================
-WORD2VEC_PATH = "datasets/processed/word2vec.model"
-w2v = load_word2vec(WORD2VEC_PATH)
-
-MAX_LEN = 20
-DIM = 300
 
 # =========================
 # SCHEMA
@@ -35,41 +24,18 @@ DIM = 300
 class InputText(BaseModel):
     text: str
 
+
 # =========================
-# ROOT
+# ROOT TEST
 # =========================
 @app.get("/")
 def home():
     return {"msg": "API is running 🚀"}
 
+
 # =========================
-# PREDICT + PIPELINE
+# PREDICT ENDPOINT
 # =========================
 @app.post("/predict")
 def predict_api(data: InputText):
-    text = data.text
-
-    print("📩 Input:", text)
-
-    # ===== 1. PREPROCESS =====
-    tokens = preprocess_email(text)
-
-    # ===== 2. WORD2VEC =====
-    vectors = tokens_to_vectors(tokens, w2v, MAX_LEN, DIM)
-
-    # lấy 5 chiều đầu cho UI
-    vectors_5d = [vec[:5].tolist() for vec in vectors[:len(tokens)]]
-
-    # ===== 3. MODEL =====
-    result = predict_text(text)
-
-    print("📤 Output:", result)
-
-    # ===== RESPONSE =====
-    return {
-        "text": text,
-        "tokens": tokens,
-        "vectors": vectors_5d,
-        "prob": result["prob"],
-        "label": result["label"]
-    }
+    return predict_text(data.text)

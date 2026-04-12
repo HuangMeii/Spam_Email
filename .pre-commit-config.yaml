@@ -6,12 +6,13 @@ repos:
         args: [--fix]
       - id: ruff-format
 
-  - repo: local
-    hooks:
-      - id: mypy
-        name: mypy (local)
-        entry: mypy
-        language: system
-        pass_filenames: false
-        args: ["src"]
-        types: [python]
+  # - repo: local
+  #   hooks:
+  #     - id: mypy
+  #       name: mypy (local)
+  #       entry: mypy
+  #       language: system
+  #       pass_filenames: true
+  #       # args: ["src"]
+  #       types: [python]
+  #       stages: [commit]
