@@ -1,13 +1,12 @@
 import numpy as np
 import torch
-
 import torch.nn as nn
+from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve, f1_score
-from torch.utils.data import DataLoader
 
-from src.models.test import evaluate
 from src.models.train import train
+from src.models.test import evaluate
 
 
 # =========================
@@ -55,23 +54,41 @@ y = np.load(f"{DATA_PATH}/y.npy")
 
 
 # =========================
-# SPLIT (train / val / test)
+# SPLIT DATA
 # =========================
 X_train, X_temp, y_train, y_temp = train_test_split(
-    X, y, test_size=0.3, stratify=y, random_state=42
+    X, y,
+    test_size=0.3,
+    stratify=y,
+    random_state=42
 )
 
 X_val, X_test, y_val, y_test = train_test_split(
-    X_temp, y_temp, test_size=0.5, stratify=y_temp, random_state=42
+    X_temp, y_temp,
+    test_size=0.5,
+    stratify=y_temp,
+    random_state=42
 )
 
 
 # =========================
 # LOADERS
 # =========================
-train_loader = DataLoader(EmailDataset(X_train, y_train), batch_size=128, shuffle=True)
-val_loader = DataLoader(EmailDataset(X_val, y_val), batch_size=128)
-test_loader = DataLoader(EmailDataset(X_test, y_test), batch_size=128)
+train_loader = DataLoader(
+    EmailDataset(X_train, y_train),
+    batch_size=128,
+    shuffle=True
+)
+
+val_loader = DataLoader(
+    EmailDataset(X_val, y_val),
+    batch_size=128
+)
+
+test_loader = DataLoader(
+    EmailDataset(X_test, y_test),
+    batch_size=128
+)
 
 
 # =========================
@@ -82,63 +99,57 @@ print("Device:", device)
 
 
 # =========================
-# MODEL
+# INIT MODEL
 # =========================
 model = LSTMClassifier().to(device)
 
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
 
 # =========================
-# TRAIN
+# TRAIN LOOP
 # =========================
 EPOCHS = 5
 
 for epoch in range(EPOCHS):
-    loss = train(model, train_loader, device)
+    loss, samples = train(model, train_loader, device, optimizer)
 
-    print(f"\nEpoch {epoch+1}/{EPOCHS}")
+    print(f"\n========== EPOCH {epoch+1}/{EPOCHS} ==========")
+    print(f"Train Samples: {samples}")
     print(f"Train Loss: {loss:.4f}")
 
 
-# ==========================================================
-# 🔥 THRESHOLD SELECTION (IMPROVED)
-# ==========================================================
+# =========================
+# GET VALIDATION PROBS
+# =========================
+model.eval()
 
-def get_probs(model, loader):
-    model.eval()
+val_probs = []
+val_labels = []
 
-    probs_all = []
-    labels_all = []
+with torch.no_grad():
+    for X_batch, y_batch in val_loader:
+        X_batch = X_batch.to(device)
 
-    with torch.no_grad():
-        for X_batch, y_batch in loader:
-            X_batch = X_batch.to(device)
+        logits = model(X_batch)
+        probs = torch.sigmoid(logits)
 
-            logits = model(X_batch)
-            probs = torch.sigmoid(logits)
+        val_probs.extend(probs.cpu().numpy())
+        val_labels.extend(y_batch.numpy())
 
-            probs_all.extend(probs.cpu().numpy())
-            labels_all.extend(y_batch.numpy())
-
-    return np.array(probs_all), np.array(labels_all)
+val_probs = np.array(val_probs)
+val_labels = np.array(val_labels)
 
 
 # =========================
-# GET VAL PREDICTIONS
+# THRESHOLD SELECTION
 # =========================
-val_probs, val_labels = get_probs(model, val_loader)
 
-
-# =========================
-# 1. ROC (Youden)
-# =========================
+# ROC (Youden J)
 fpr, tpr, thresholds = roc_curve(val_labels, val_probs)
-youden = tpr - fpr
-thr_roc = thresholds[np.argmax(youden)]
+thr_roc = thresholds[np.argmax(tpr - fpr)]
 
-
-# =========================
-# 2. F1 optimal threshold
-# =========================
+# F1 search
 best_f1 = 0
 thr_f1 = 0.5
 
@@ -151,26 +162,24 @@ for t in np.arange(0.1, 0.9, 0.01):
         thr_f1 = t
 
 
-# =========================
-# FINAL THRESHOLD (BALANCED)
-# =========================
+# FINAL threshold
 final_threshold = (thr_roc + thr_f1) / 2
 
 
-print("\n========== THRESHOLD SELECTION ==========")
-print(f"ROC threshold   : {thr_roc:.4f}")
-print(f"F1 threshold    : {thr_f1:.4f}")
-print(f"FINAL threshold : {final_threshold:.4f}")
+print("\n========== THRESHOLD RESULT ==========")
+print(f"ROC threshold : {thr_roc:.4f}")
+print(f"F1 threshold  : {thr_f1:.4f}")
+print(f"FINAL         : {final_threshold:.4f}")
 
 
 # =========================
-# TEST EVALUATION (FIXED THRESHOLD)
+# TEST EVALUATION
 # =========================
-evaluate(model, test_loader, device, name="TEST (FINAL)")
+evaluate(model, test_loader, device, name="TEST", threshold=final_threshold)
 
 
 # =========================
 # SAVE MODEL
 # =========================
 torch.save(model.state_dict(), "model.pth")
-print("\nModel saved.")
+print("\nModel saved successfully.")
