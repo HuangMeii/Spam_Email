@@ -1,25 +1,23 @@
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
-from sklearn.model_selection import train_test_split
-
-from src.models.train import train
-from src.models.test import evaluate
-from src.models.metric import best_threshold_roc
 
 # =========================
 # MODEL
 # =========================
 import torch.nn as nn
+from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader
+
+from src.models.test import evaluate
+from src.models.train import train
+
 
 class LSTMClassifier(nn.Module):
     def __init__(self, input_dim=300, hidden_dim=64):
         super().__init__()
 
         self.lstm = nn.LSTM(
-            input_size=input_dim,
-            hidden_size=hidden_dim,
-            batch_first=True
+            input_size=input_dim, hidden_size=hidden_dim, batch_first=True
         )
 
         self.fc = nn.Linear(hidden_dim, 1)

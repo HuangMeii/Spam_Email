@@ -2,8 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from metric import best_threshold_roc, compute_metrics
-
+from src.models.metric import best_threshold_roc, compute_metrics
 # =========================
 # EVALUATE FUNCTION
 # =========================
