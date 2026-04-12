@@ -67,3 +67,14 @@ button {
   font-family: monospace;
   border-radius: 5px;
 }
+.lstm-box {
+  margin-top: 10px;
+}
+
+.lstm-box .code {
+  font-family: monospace;
+  background: #f4f6f8;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
