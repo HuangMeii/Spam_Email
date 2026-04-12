@@ -145,12 +145,13 @@ evaluate(
 # =========================
 # SAVE FINAL MODEL
 # =========================
+path = "/content/drive/MyDrive/datasets/model.pth"
+
 torch.save({
-        "model_state_dict": model.state_dict(),
-        "threshold": threshold,
-        "val_loss": val_loss
-})
+    "model_state_dict": model.state_dict(),
+    "threshold": threshold,
+    "val_loss": val_loss
+}, path)
 
 print(f"\n✅ Model saved successfully!")
 print(f"📁 Path: {os.path.abspath(path)}")
-print("\nModel saved successfully.")
