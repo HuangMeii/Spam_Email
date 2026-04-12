@@ -26,7 +26,7 @@ y = np.load(DATA_PATH / "y.npy")
 print("Full shape:", X.shape, y.shape)
 
 # reduce dataset for CPU
-n = len(X) // 5
+n = len(X) // 1
 X = X[:n]
 y = y[:n]
 
