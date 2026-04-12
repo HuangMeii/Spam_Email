@@ -8,7 +8,7 @@ from src.models.metric import best_threshold_roc, compute_metrics
 # =========================
 # EVALUATION
 # =========================
-def evaluate(model, loader, device, name="TEST", threshold=None):
+def evaluate(model, loader, device, name="TEST", threshold=0.5):
     model.eval()
 
     criterion = nn.BCEWithLogitsLoss()
@@ -23,9 +23,9 @@ def evaluate(model, loader, device, name="TEST", threshold=None):
         for X_batch, y_batch in loader:
 
             X_batch = X_batch.to(device)
-            y_batch = y_batch.to(device)
+            y_batch = y_batch.to(device).float()
 
-            logits = model(X_batch)
+            logits = model(X_batch).squeeze()
             loss = criterion(logits, y_batch)
 
             total_loss += loss.item()
@@ -43,17 +43,12 @@ def evaluate(model, loader, device, name="TEST", threshold=None):
     all_labels = np.array(all_labels)
 
     # =========================
-    # THRESHOLD LOGIC
+    # ROC SCORE (CHỈ REPORT, KHÔNG DÙNG ĐỂ ĐỔI THRESHOLD)
     # =========================
-
-    if threshold is None:
-        threshold, j_score = best_threshold_roc(all_labels, all_probs)
-    else:
-        # vẫn tính ROC score để report
-        _, j_score = best_threshold_roc(all_labels, all_probs)
+    _, j_score = best_threshold_roc(all_labels, all_probs)
 
     # =========================
-    # METRICS
+    # METRICS (DÙNG THRESHOLD FIXED)
     # =========================
     metrics = compute_metrics(all_labels, all_probs, threshold)
 
@@ -65,7 +60,7 @@ def evaluate(model, loader, device, name="TEST", threshold=None):
     print(f"Samples: {num_samples}")
     print(f"Loss: {total_loss / len(loader):.4f}")
 
-    print(f"Threshold: {threshold:.4f}")
+    print(f"Threshold (FIXED): {threshold:.4f}")
     print(f"Youden J Score: {j_score:.4f}")
 
     print(f"Accuracy: {metrics['acc']:.4f}")
