@@ -45,8 +45,8 @@ class EmailDataset(torch.utils.data.Dataset):
 # =========================
 # LOAD DATA
 # =========================
-X = np.load("data/X.npy")
-y = np.load("data/y.npy")
+X = np.load("datassets/X.npy")
+y = np.load("datassets/y.npy")
 
 # =========================
 # SPLIT
