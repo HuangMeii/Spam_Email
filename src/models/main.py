@@ -3,9 +3,9 @@ import torch
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 
-from train import train
-from test import evaluate
-from metric import best_threshold_roc
+from src.models.train import train
+from src.models.test import evaluate
+from src.models.metric import best_threshold_roc
 
 # =========================
 # MODEL
