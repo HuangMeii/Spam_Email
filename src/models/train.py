@@ -72,6 +72,6 @@ def train_one_epoch(model, train_loader, val_loader, device, optimizer):
     # =====================
     # PRINT
     # =====================
-    print(f"Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f} | Threshold: {best_threshold:.4f}")
+    # print(f"Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f} | Threshold: {best_threshold:.4f}")
 
     return avg_train_loss, avg_val_loss, best_threshold, num_samples
