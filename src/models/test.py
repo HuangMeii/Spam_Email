@@ -6,15 +6,16 @@ from src.models.metric import best_threshold_roc, compute_metrics
 
 
 # =========================
-# TEST / EVALUATION
+# EVALUATION
 # =========================
-def evaluate(model, loader, device, name="TEST"):
+def evaluate(model, loader, device, name="TEST", threshold=None):
     model.eval()
 
     criterion = nn.BCEWithLogitsLoss()
 
     all_probs = []
     all_labels = []
+
     total_loss = 0.0
     num_samples = 0
 
@@ -42,9 +43,14 @@ def evaluate(model, loader, device, name="TEST"):
     all_labels = np.array(all_labels)
 
     # =========================
-    # ROC + Youden threshold
+    # THRESHOLD LOGIC
     # =========================
-    threshold, j_score = best_threshold_roc(all_labels, all_probs)
+
+    if threshold is None:
+        threshold, j_score = best_threshold_roc(all_labels, all_probs)
+    else:
+        # vẫn tính ROC score để report
+        _, j_score = best_threshold_roc(all_labels, all_probs)
 
     # =========================
     # METRICS
@@ -59,7 +65,7 @@ def evaluate(model, loader, device, name="TEST"):
     print(f"Samples: {num_samples}")
     print(f"Loss: {total_loss / len(loader):.4f}")
 
-    print(f"Best Threshold (ROC/Youden): {threshold:.4f}")
+    print(f"Threshold: {threshold:.4f}")
     print(f"Youden J Score: {j_score:.4f}")
 
     print(f"Accuracy: {metrics['acc']:.4f}")
