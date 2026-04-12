@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve, f1_score
 
-from src.models.train import train
+from src.models.train import train_one_epoch
 from src.models.test import evaluate
 
 
@@ -112,7 +112,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 EPOCHS = 5
 
 for epoch in range(EPOCHS):
-    loss, samples = train(model, train_loader, device, optimizer)
+    loss, samples = train_one_epoch(model, train_loader, device, optimizer)
 
     print(f"\n========== EPOCH {epoch+1}/{EPOCHS} ==========")
     print(f"Train Samples: {samples}")
