@@ -2,25 +2,71 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Iterable
 from html import unescape
 from pathlib import Path
-from typing import Iterable
 
 import numpy as np
 import pandas as pd
 from gensim.models import Word2Vec
 from nltk.stem import PorterStemmer
 
-
 # =========================
 # STOPWORDS
 # =========================
-STOPWORDS = frozenset({
-    "a","an","the","and","or","but","if","while","with","to","of","at","by","for",
-    "from","in","on","off","out","over","under","as","is","it","this","that",
-    "these","those","am","are","was","were","be","been","being","have","has",
-    "had","do","does","did","so","such","no","not","too","very","can","will"
-})
+STOPWORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "but",
+        "if",
+        "while",
+        "with",
+        "to",
+        "of",
+        "at",
+        "by",
+        "for",
+        "from",
+        "in",
+        "on",
+        "off",
+        "out",
+        "over",
+        "under",
+        "as",
+        "is",
+        "it",
+        "this",
+        "that",
+        "these",
+        "those",
+        "am",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "so",
+        "such",
+        "no",
+        "not",
+        "too",
+        "very",
+        "can",
+        "will",
+    }
+)
 
 _STEMMER = PorterStemmer()
 
@@ -73,7 +119,7 @@ def train_word2vec(tokenized: list[list[str]], vector_size=300) -> Word2Vec:
         sg=1,
         workers=workers,
         epochs=5,
-        seed=42
+        seed=42,
     )
 
     return model
@@ -90,7 +136,6 @@ def load_word2vec(path: str) -> Word2Vec:
 # TOKENS → VECTOR SEQUENCE
 # =========================
 def tokens_to_vectors(tokens, model, max_len=20, dim=300):
-
     seq = []
 
     for t in tokens[:max_len]:
@@ -110,7 +155,6 @@ def tokens_to_vectors(tokens, model, max_len=20, dim=300):
 # BUILD DATASET (TRAIN)
 # =========================
 def build_dataset(input_path: str, output_dir: str, max_len: int = 20):
-
     print("Loading dataset...")
     df = load_email_dataframe(input_path)
 
@@ -123,10 +167,10 @@ def build_dataset(input_path: str, output_dir: str, max_len: int = 20):
 
     print("Converting to sequences...")
 
-    X = np.array([
-        tokens_to_vectors(tokens, w2v, max_len, dim)
-        for tokens in tokenized
-    ], dtype=np.float32)
+    X = np.array(
+        [tokens_to_vectors(tokens, w2v, max_len, dim) for tokens in tokenized],
+        dtype=np.float32,
+    )
 
     y = df["isSpam"].values.astype(np.int64)
 
@@ -153,5 +197,5 @@ if __name__ == "__main__":
     build_dataset(
         input_path="datasets/processed/email_dataset_github_processed.csv",
         output_dir="datasets/processed/",
-        max_len=20 
+        max_len=20,
     )
