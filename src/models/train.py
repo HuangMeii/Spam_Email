@@ -1,10 +1,6 @@
 import torch
 import torch.nn as nn
 
-
-# =========================
-# LOSS (GLOBAL)
-# =========================
 criterion = nn.BCEWithLogitsLoss()
 
 

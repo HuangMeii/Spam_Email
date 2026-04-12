@@ -54,7 +54,7 @@ y = np.load(f"{DATA_PATH}/y.npy")
 
 
 # =========================
-# SPLIT DATA
+# SPLIT
 # =========================
 X_train, X_temp, y_train, y_temp = train_test_split(
     X, y,
@@ -82,12 +82,14 @@ train_loader = DataLoader(
 
 val_loader = DataLoader(
     EmailDataset(X_val, y_val),
-    batch_size=128
+    batch_size=128,
+    shuffle=False
 )
 
 test_loader = DataLoader(
     EmailDataset(X_test, y_test),
-    batch_size=128
+    batch_size=128,
+    shuffle=False
 )
 
 
@@ -120,7 +122,7 @@ for epoch in range(EPOCHS):
 
 
 # =========================
-# GET VALIDATION PROBS
+# VALIDATION PREDICTIONS
 # =========================
 model.eval()
 
@@ -129,6 +131,7 @@ val_labels = []
 
 with torch.no_grad():
     for X_batch, y_batch in val_loader:
+
         X_batch = X_batch.to(device)
 
         logits = model(X_batch)
@@ -147,7 +150,8 @@ val_labels = np.array(val_labels)
 
 # ROC (Youden J)
 fpr, tpr, thresholds = roc_curve(val_labels, val_probs)
-thr_roc = thresholds[np.argmax(tpr - fpr)]
+youden_j = tpr - fpr
+thr_roc = thresholds[np.argmax(youden_j)]
 
 # F1 search
 best_f1 = 0
@@ -162,7 +166,7 @@ for t in np.arange(0.1, 0.9, 0.01):
         thr_f1 = t
 
 
-# FINAL threshold
+# FINAL threshold (balanced)
 final_threshold = (thr_roc + thr_f1) / 2
 
 
@@ -175,7 +179,13 @@ print(f"FINAL         : {final_threshold:.4f}")
 # =========================
 # TEST EVALUATION
 # =========================
-evaluate(model, test_loader, device, name="TEST", threshold=final_threshold)
+evaluate(
+    model,
+    test_loader,
+    device,
+    name="TEST",
+    threshold=final_threshold
+)
 
 
 # =========================
