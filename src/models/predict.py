@@ -41,6 +41,18 @@ device = torch.device("cpu")
 MAX_LEN = 20
 DIM = 300
 
+model = None
+w2v = None
+threshold = 0.5
+
+W_f = None
+b_f = None
+W_i = None
+b_i = None
+W_c = None
+b_c = None
+W_o = None
+b_o = None
 
 # =========================
 # GLOBAL MODEL
@@ -50,8 +62,20 @@ w2v = None
 threshold = 0.5
 
 
+def extract_forget_gate(model):
+    W_ih = model.lstm.weight_ih_l0.detach().cpu().numpy()
+    b_ih = model.lstm.bias_ih_l0.detach().cpu().numpy()
+
+    hidden_dim = W_ih.shape[0] // 4
+
+    W_f = W_ih[hidden_dim : 2 * hidden_dim]
+    b_f = b_ih[hidden_dim : 2 * hidden_dim]
+
+    return W_f, b_f
+
+
 def load_all():
-    global model, w2v, threshold
+    global model, w2v, threshold, W_f, b_f, W_i, b_i, W_c, b_c, W_o, b_o
 
     print("🔄 Loading model...")
 
@@ -63,11 +87,52 @@ def load_all():
 
     model.eval()
 
-    print("✅ Model loaded!")
-
     print("🔄 Loading Word2Vec...")
     w2v = load_word2vec(str(WORD2VEC_PATH))
-    print("✅ Word2Vec loaded!")
+
+    print("🔄 Extracting LSTM forget gate...")
+
+    W_f, b_f = extract_forget_gate(model)
+    W_i, b_i = extract_input_gate(model)
+    W_c, b_c = extract_candidate_memory(model)
+    W_o, b_o = extract_output_gate(model)
+    print("✅ Ready!")
+
+
+def extract_input_gate(model):
+    W_ih = model.lstm.weight_ih_l0.detach().cpu().numpy()
+    b_ih = model.lstm.bias_ih_l0.detach().cpu().numpy()
+
+    hidden_dim = W_ih.shape[0] // 4
+
+    W_i = W_ih[hidden_dim * 1 : hidden_dim * 2]
+    b_i = b_ih[hidden_dim * 1 : hidden_dim * 2]
+
+    return W_i, b_i
+
+
+def extract_candidate_memory(model):
+    W_ih = model.lstm.weight_ih_l0.detach().cpu().numpy()
+    b_ih = model.lstm.bias_ih_l0.detach().cpu().numpy()
+
+    hidden_dim = W_ih.shape[0] // 4
+
+    W_c = W_ih[hidden_dim * 2 : hidden_dim * 3]
+    b_c = b_ih[hidden_dim * 2 : hidden_dim * 3]
+
+    return W_c, b_c
+
+
+def extract_output_gate(model):
+    W_ih = model.lstm.weight_ih_l0.detach().cpu().numpy()
+    b_ih = model.lstm.bias_ih_l0.detach().cpu().numpy()
+
+    hidden_dim = W_ih.shape[0] // 4
+
+    W_o = W_ih[hidden_dim * 3 : hidden_dim * 4]
+    b_o = b_ih[hidden_dim * 3 : hidden_dim * 4]
+
+    return W_o, b_o
 
 
 # =========================
@@ -111,12 +176,21 @@ def predict_text(text: str):
         # =========================
         # RETURN FULL PIPELINE
         # =========================
+        print("---------------------", W_i, b_i)
         return {
             "raw_text": text,
             "tokens": tokens,
             "vectors": vectors_5d,
             "prob": round(prob, 4),
             "label": "spam" if pred else "ham",
+            "W_f": None if W_f is None else W_f.tolist(),
+            "b_f": None if b_f is None else b_f.tolist(),
+            "W_i": None if W_i is None else W_i.tolist(),
+            "b_i": None if b_i is None else b_i.tolist(),
+            "W_c": None if W_c is None else W_c.tolist(),
+            "b_c": None if b_c is None else b_c.tolist(),
+            "W_o": None if W_o is None else W_o.tolist(),
+            "b_o": None if b_o is None else b_o.tolist(),
         }
 
     except Exception as e:

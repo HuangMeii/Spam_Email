@@ -89,6 +89,7 @@ def load_email_dataframe(dataset_path: str | Path) -> pd.DataFrame:
 # =========================
 def preprocess_email(text: str) -> list[str]:
     text = unescape(text.lower())
+    text = re.sub(r"http\S+|www\S+", " ", text)
     text = _HTML_PATTERN.sub(" ", text)
     text = _NON_WORD_PATTERN.sub(" ", text)
     text = re.sub(r"\s+", " ", text).strip()
